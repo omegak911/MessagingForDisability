@@ -15,11 +15,21 @@
 }
 
 .App-title {
-  font-size: 1.5em;
+  white-space: pre-line;
 }
 
-.App-intro {
-  font-size: large;
+.textContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.textDisplay {
+  margin-top: 10px;
+  border: 1px solid black;
+  height: 50vh;
+  overflow: scroll;
+  width: 50vh;
+  white-space: pre-line;
 }
 
 @keyframes App-logo-spin {

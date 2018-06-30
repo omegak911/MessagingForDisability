@@ -6,15 +6,8 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList
 const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
 
-const siriRecognition = new SpeechRecognition();
-const speechRecognitionList = new SpeechGrammarList();
-siriRecognition.grammars = speechRecognitionList;
-siriRecognition.continuous = true;
-siriRecognition.lang = 'en-US';
-siriRecognition.interimResults = false;
-siriRecognition.maxAlternatives = 1;
-
 const recognition = new SpeechRecognition();
+const speechRecognitionList = new SpeechGrammarList();
 recognition.grammars = speechRecognitionList;
 recognition.continuous = true;
 recognition.lang = 'en-US';
@@ -25,100 +18,97 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      currentSiriIndex: 0,
-      currentTranscriptIndex: 0,
       liveSpeechView: '',
+      typedSentence:  '',
+      wordsArray: [],
     }
   }
 
   componentDidMount() {
-    this.siri();
+    this.generalRecognition();
   }
 
   generalRecognition = () => {
     let context = this;
-    let transcript = '';
     recognition.start();
     recognition.onresult = function(event) {
-      console.log('general results')
-      let index = context.state.currentTranscriptIndex;
-      let allWordsHolder = event.results
-      let word = event.results[index][0].transcript
+      let word = event.results[0][0].transcript
       console.log(word)
+      let { wordsArray } = context.state;
 
-      if (word === ' Siri') { //we can also change this back to includes
-        context.siri();
-        recognition.stop();
+      if (word === 'delete') {
+        wordsArray.pop()
+      } else if (word === 'line') {
+        wordsArray.push('\n')
+      } else {
+        word = ' ' + word;
+        wordsArray.push(word)
       }
 
+      let sentence = wordsArray.join('');
+
       context.setState({ 
-        currentTranscriptIndex: context.state.currentTranscriptIndex + 1,
-        liveSpeechView: context.state.liveSpeechView + word,
+        liveSpeechView: sentence,
+        wordsArray: [...wordsArray],
       })
+      recognition.stop();
     }
 
-    recognition.onspeechend = function(event) {
-      context.setState({ currentcurrentTranscriptIndex: 0 })
-      console.log('recognition stopped')
+    recognition.onend = () => {
+      let textDisplay = document.getElementsByClassName('textDisplay')[0];
+      textDisplay.scrollTop = textDisplay.scrollHeight;
+      context.generalRecognition();
     }
     
-    recognition.onnomatch = function(event) {
+    recognition.onnomatch = (event) => {
       console.log('recognition no match')
     }
     
-    recognition.onerror = function(event) {
+    recognition.onerror = (event) => {
       console.log('recognition error')
     }
   }
 
-  siri = () => {
-    let context = this;
-    let transcript = '';
-    siriRecognition.start();
-    siriRecognition.onresult = function(event) {
-      console.log('siri results')
-      let index = context.state.currentSiriIndex;
-      let allWordsHolder = event.results;
-      let word = event.results[index][0].transcript
-      console.log(word)
+  transcriptSentence = (e) => {
+    let typedSentence = e.target.value;
+    this.setState({ typedSentence })
+  }
 
-      context.setState({
-        currentSiriIndex: context.state.currentSiriIndex + 1,
-      })
+  updateChat = (e) => {
+    e.preventDefault();
+    const { typedSentence, wordsArray } = this.state;
 
-      if (word === ' activate') {
-        context.generalRecognition();
-        siriRecognition.stop();
-      }
-    }
-    
-    siriRecognition.onspeechend = function(event) {
-      context.setState({ currentSiriIndex: 0 })
-      console.log('siri stopped')
-    }
-    
-    siriRecognition.onnomatch = function(event) {
-      console.log('recognition no match')
-    }
-    
-    siriRecognition.onerror = function(event) {
-      console.log('recognition error')
-    }
+    wordsArray.push(`\n${typedSentence}\n`);
+    let liveSpeechView = wordsArray.join('');
+
+    this.setState({ wordsArray: [...wordsArray], typedSentence: '', liveSpeechView });
   }
 
   render() {
-
-    let { liveSpeechView } = this.state;
+    let { liveSpeechView, mode, typedSentence } = this.state;
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h3 className="App-title">
+            {`Verbal Commands
+              "delete": removes last word/sentence added
+              "line": writes next word/sentence on next line
+            `}
+          </h3>
         </header>
-        <p className="App-intro">
-          {liveSpeechView}
-        </p>
-
+          <div id="chat">
+            <div className="textContainer">
+              <div className="textDisplay">
+                {liveSpeechView}
+              </div>
+            </div>
+            <div>
+              <form onSubmit={this.updateChat} onChange={this.transcriptSentence}>
+                <input value={typedSentence} />
+              </form>
+            </div>
+          </div>
       </div>
     );
   }
