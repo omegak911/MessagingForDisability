@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import io from 'socket.io-client/dist/socket.io';
+
 import './App.css';
+import { location, secretID } from './config';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList
@@ -21,43 +23,57 @@ class App extends Component {
       liveSpeechView: '',
       typedSentence:  '',
       wordsArray: [],
+      socket: null
     }
   }
 
   componentDidMount() {
-    this.generalRecognition();
+    this.voiceRecognition();
+
+    this.socket = io(`http://${location}:3777`, {
+      query: {
+        roomId: secretID
+      }
+    })
+    
+    this.socket.on('server.enter', ({ msg }) => {
+      console.log(msg)
+    })
+
+    this.socket.on('server.sentMsg', ({ sentence }) => {
+      const { wordsArray } = this.state;
+      wordsArray.push(`${sentence}\n`);
+      let liveSpeechView = wordsArray.join('');
+      this.setState({ wordsArray: [...wordsArray],liveSpeechView });
+    })
+
+    this.setState({ socket: this.socket })
   }
 
-  generalRecognition = () => {
+  sendMsg = (sentence) => {
+    const { socket } = this.state;
+    socket.emit('client.sentMsg', { sentence });
+  }
+
+  voiceRecognition = () => {
     let context = this;
     recognition.start();
     recognition.onresult = function(event) {
-      let word = event.results[0][0].transcript
-      console.log(word)
-      let { wordsArray } = context.state;
+      let sentence = event.results[0][0].transcript
 
-      if (word === 'delete') {
-        wordsArray.pop()
-      } else if (word === 'line') {
-        wordsArray.push('\n')
-      } else {
-        word = ' ' + word;
-        wordsArray.push(word)
-      }
+      // if (word === 'delete') {
+      //   wordsArray.pop()
+      // } else {
+      // }
 
-      let sentence = wordsArray.join('');
-
-      context.setState({ 
-        liveSpeechView: sentence,
-        wordsArray: [...wordsArray],
-      })
+      context.sendMsg(sentence)
       recognition.stop();
     }
 
     recognition.onend = () => {
       let textDisplay = document.getElementsByClassName('textDisplay')[0];
       textDisplay.scrollTop = textDisplay.scrollHeight;
-      context.generalRecognition();
+      context.voiceRecognition();
     }
     
     recognition.onnomatch = (event) => {
@@ -76,12 +92,11 @@ class App extends Component {
 
   updateChat = (e) => {
     e.preventDefault();
-    const { typedSentence, wordsArray } = this.state;
+    const { typedSentence } = this.state;
+    this.sendMsg(typedSentence);
 
-    wordsArray.push(`\n${typedSentence}\n`);
-    let liveSpeechView = wordsArray.join('');
 
-    this.setState({ wordsArray: [...wordsArray], typedSentence: '', liveSpeechView });
+    this.setState({ typedSentence: '' });
   }
 
   render() {
@@ -89,7 +104,6 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
           <h3 className="App-title">
             {`Verbal Commands
               "delete": removes last word/sentence added
