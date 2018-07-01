@@ -4,18 +4,6 @@ import io from 'socket.io-client/dist/socket.io';
 import './App.css';
 import { location, secretID } from './config';
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList
-const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
-
-const recognition = new SpeechRecognition();
-const speechRecognitionList = new SpeechGrammarList();
-recognition.grammars = speechRecognitionList;
-recognition.continuous = true;
-recognition.lang = 'en-US';
-recognition.interimResults = false;
-recognition.maxAlternatives = 1;
-
 class App extends Component {
   constructor(props) {
     super(props)
@@ -27,6 +15,7 @@ class App extends Component {
   }
 
   componentDidMount() {
+
     this.voiceRecognition();
 
     this.socket = io(`http://${location}:3777`, {
@@ -60,6 +49,22 @@ class App extends Component {
   }
 
   voiceRecognition = () => {
+    if (!('webkitSpeechRecognition') in window) {
+      console.log('hey you do not have the speech recognition');
+    }
+
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList
+    const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
+
+    const recognition = new SpeechRecognition();
+    const speechRecognitionList = new SpeechGrammarList();
+    recognition.grammars = speechRecognitionList;
+    recognition.continuous = true;
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
     let context = this;
     recognition.start();
     recognition.onresult = function(event) {
@@ -104,9 +109,8 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <h3 className="App-title">
-            {`Verbal Commands
+            {`Singular Verbal Commands
               "delete": removes last word/sentence added
-              "line": writes next word/sentence on next line
             `}
           </h3>
         </header>
