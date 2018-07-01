@@ -20,7 +20,6 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      liveSpeechView: '',
       typedSentence:  '',
       wordsArray: [],
       socket: null
@@ -42,9 +41,14 @@ class App extends Component {
 
     this.socket.on('server.sentMsg', ({ sentence }) => {
       const { wordsArray } = this.state;
-      wordsArray.push(`${sentence}\n`);
-      let liveSpeechView = wordsArray.join('');
-      this.setState({ wordsArray: [...wordsArray],liveSpeechView });
+
+      if (sentence === 'delete') {
+        wordsArray.pop();
+      } else {
+        wordsArray.push(`${sentence}\n`);
+      }
+
+      this.setState({ wordsArray: [...wordsArray] });
     })
 
     this.setState({ socket: this.socket })
@@ -60,11 +64,6 @@ class App extends Component {
     recognition.start();
     recognition.onresult = function(event) {
       let sentence = event.results[0][0].transcript
-
-      // if (word === 'delete') {
-      //   wordsArray.pop()
-      // } else {
-      // }
 
       context.sendMsg(sentence)
       recognition.stop();
@@ -100,7 +99,7 @@ class App extends Component {
   }
 
   render() {
-    let { liveSpeechView, mode, typedSentence } = this.state;
+    let { wordsArray, mode, typedSentence } = this.state;
     return (
       <div className="App">
         <header className="App-header">
@@ -114,7 +113,11 @@ class App extends Component {
           <div id="chat">
             <div className="textContainer">
               <div className="textDisplay">
-                {liveSpeechView}
+                {wordsArray.map(word =>
+                  <span>
+                    {word}
+                  </span>
+                )}
               </div>
             </div>
             <div>
