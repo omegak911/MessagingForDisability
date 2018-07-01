@@ -99,7 +99,7 @@ class App extends Component {
   }
 
   render() {
-    let { wordsArray, mode, typedSentence } = this.state;
+    let { mode, typedSentence, wordsArray } = this.state;
     return (
       <div className="App">
         <header className="App-header">
