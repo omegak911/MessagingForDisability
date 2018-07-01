@@ -85,7 +85,7 @@ class App extends Component {
     }
     
     recognition.onerror = (event) => {
-      console.log('recognition error')
+      console.log('recognition error: ', event.error)
     }
   }
 
