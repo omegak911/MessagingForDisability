@@ -113,8 +113,8 @@ class App extends Component {
           <div id="chat">
             <div className="textContainer">
               <div className="textDisplay">
-                {wordsArray.map(word =>
-                  <span>
+                {wordsArray.map((word, index) =>
+                  <span key={index}>
                     {word}
                   </span>
                 )}
