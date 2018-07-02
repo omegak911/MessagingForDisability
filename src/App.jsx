@@ -18,7 +18,7 @@ class App extends Component {
 
     this.voiceRecognition();
 
-    this.socket = io(`https://speakingfordisability.herokuapp.com:3777`, {
+    this.socket = io(`https://speakingfordisability.herokuapp.com`, {
       query: {
         roomId: secretID
       }
