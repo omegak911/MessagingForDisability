@@ -17,8 +17,6 @@
     "socket.io-client": "^2.1.1"
   },
   "scripts": {
-    "start": "node socket_server/bin/entry.js",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js --env=jsdom"
+    "start": "node socket_server/bin/entry.js"
   }
 }
