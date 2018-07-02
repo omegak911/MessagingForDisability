@@ -1,9 +1,16 @@
 import express from 'express';
+import cors from 'cors';
 import http from 'http';
 import socket from 'socket.io';
 
+const corsOptions = {
+  origin: `http://localhost:3000`,
+  methods: 'GET'
+};
+
 import clientEvents from './clientEvents';
 const app = express();
+app.use(cors(corsOptions))
 const server = http.createServer(app);
 const io = socket(server);
 
