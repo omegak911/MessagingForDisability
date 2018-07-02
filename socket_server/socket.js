@@ -4,7 +4,7 @@ import http from 'http';
 import socket from 'socket.io';
 
 const corsOptions = {
-  origin: `http://localhost:3000`,
+  origin: `https://omegak911.github.io/MessagingForDisability/`,
   methods: 'GET'
 };
 
