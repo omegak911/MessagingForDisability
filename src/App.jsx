@@ -18,7 +18,7 @@ class App extends Component {
 
     this.voiceRecognition();
 
-    this.socket = io(`https://speakingfordisability.herokuapp.com`, {
+    this.socket = io(`https://speakingfordisability.herokuapp.com:3777`, {
       query: {
         roomId: secretID
       }
@@ -111,6 +111,7 @@ class App extends Component {
           <h3 className="App-title">
             {`Singular Verbal Commands
               "delete": removes last word/sentence added
+              hello
             `}
           </h3>
         </header>
