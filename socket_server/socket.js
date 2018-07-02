@@ -4,7 +4,7 @@ import http from 'http';
 import socket from 'socket.io';
 
 const corsOptions = {
-  origin: `https://omegak911.github.io/MessagingForDisability/`,
+  origin: `https://omegak911.github.io/`,
   methods: 'GET'
 };
 
